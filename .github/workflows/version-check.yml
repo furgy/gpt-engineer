@@ -21,7 +21,8 @@ jobs:
         run: |
           git fetch --unshallow origin main
           git checkout main
-          PREV_VERSION=$(git show main^:VERSION 2>/dev/null || echo "0.0.0")
+          PREV_COMMIT=$(git log -2 --pretty=format:%H | tail -1)
+          PREV_VERSION=$(git show $PREV_COMMIT:VERSION 2>/dev/null || echo "0.0.0")
           echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
           
       - name: Check version bump
