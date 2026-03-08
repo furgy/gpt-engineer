@@ -1,0 +1,55 @@
+name: Version Check
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Read current version
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Get previous commit version
+        id: prev-version
+        run: |
+          git fetch origin main --depth=2
+          if git show origin/main:VERSION >/dev/null 2>&1; then
+            PREV_VERSION=$(git show origin/main:VERSION)
+          else
+            PREV_VERSION="0.0.0"
+          fi
+          echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Check version bump
+        run: |
+          CURRENT="${{ steps.version.outputs.version }}"
+          PREV="${{ steps.prev-version.outputs.prev_version }}"
+          
+          CURRENT_PARTS=(${CURRENT//./ })
+          PREV_PARTS=(${PREV//./ })
+          
+          MAJOR=${CURRENT_PARTS[0]}
+          MINOR=${CURRENT_PARTS[1]}
+          PATCH=${CURRENT_PARTS[2]}
+          
+          PREV_MAJOR=${PREV_PARTS[0]}
+          PREV_MINOR=${PREV_PARTS[1]}
+          PREV_PATCH=${PREV_PARTS[2]}
+          
+          if [ "$MAJOR" -gt "$PREV_MAJOR" ] || \
+             [ "$MAJOR" -eq "$PREV_MAJOR" -a "$MINOR" -gt "$PREV_MINOR" ] || \
+             [ "$MAJOR" -eq "$PREV_MAJOR" -a "$MINOR" -eq "$PREV_MINOR" -a "$PATCH" -gt "$PREV_PATCH" ]; then
+            echo "Version bump detected: $PREV -> $CURRENT"
+            exit 0
+          else
+            echo "ERROR: No version bump detected. Current: $CURRENT, Previous: $PREV"
+            echo "Please bump version in VERSION file before pushing to main"
+            exit 1
+          fi
