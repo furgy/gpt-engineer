@@ -19,8 +19,9 @@ jobs:
       - name: Get previous commit version
         id: prev-version
         run: |
-          git fetch origin main --depth=2
-          PREV_VERSION=$(git show origin/main^:VERSION 2>/dev/null || echo "0.0.0")
+          git fetch --unshallow origin main
+          git checkout main
+          PREV_VERSION=$(git show main^:VERSION 2>/dev/null || echo "0.0.0")
           echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
           
       - name: Check version bump
