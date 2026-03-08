@@ -1,6 +1,6 @@
 [project]
 name = "gpt-engineer"
-version = "0.1.0"
+version = "0.2.0"
 description = "GPT Engineer utility tool"
 requires-python = ">=3.10"
 dependencies = []
