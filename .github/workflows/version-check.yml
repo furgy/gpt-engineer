@@ -20,11 +20,7 @@ jobs:
         id: prev-version
         run: |
           git fetch origin main --depth=2
-          if git show origin/main:VERSION >/dev/null 2>&1; then
-            PREV_VERSION=$(git show origin/main:VERSION)
-          else
-            PREV_VERSION="0.0.0"
-          fi
+          PREV_VERSION=$(git show origin/main^:VERSION 2>/dev/null || echo "0.0.0")
           echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
           
       - name: Check version bump
